@@ -90,5 +90,3 @@ app.MapPost("/user", (User user) => $"User: {user.Name}");
 Minimal APIs make parameter binding simple and flexible! Whether it’s from the route, query, body, or DI, it just works. 🛡️✨
 
 ---
-
-Feel free to use this in your README! 📄✨
