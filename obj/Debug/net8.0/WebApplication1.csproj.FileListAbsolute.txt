@@ -13,7 +13,6 @@
 /home/bilal/RiderProjects/WebApplication1/WebApplication1/obj/Debug/net8.0/WebApplication1.AssemblyInfo.cs
 /home/bilal/RiderProjects/WebApplication1/WebApplication1/obj/Debug/net8.0/WebApplication1.csproj.CoreCompileInputs.cache
 /home/bilal/RiderProjects/WebApplication1/WebApplication1/obj/Debug/net8.0/WebApplication1.MvcApplicationPartsAssemblyInfo.cache
-/home/bilal/RiderProjects/WebApplication1/WebApplication1/obj/Debug/net8.0/WebApplication1.sourcelink.json
 /home/bilal/RiderProjects/WebApplication1/WebApplication1/obj/Debug/net8.0/scopedcss/bundle/WebApplication1.styles.css
 /home/bilal/RiderProjects/WebApplication1/WebApplication1/obj/Debug/net8.0/staticwebassets.build.json
 /home/bilal/RiderProjects/WebApplication1/WebApplication1/obj/Debug/net8.0/staticwebassets.development.json

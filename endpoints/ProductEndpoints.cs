@@ -9,7 +9,7 @@ public static class ProductEndpoints
     public static void MapProductEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapPost("/product",PostProduct);
-        // app.MapGet("/product", ErrProduct);
+        app.MapGet("/product", ErrProduct);
         app.MapGet("/product/search", GetId);
         app.MapGet("/products", GetHeaderValues);
         app.MapGet("/temperatures", GetTemperatures);

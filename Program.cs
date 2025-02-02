@@ -19,10 +19,10 @@ var app = builder.Build();
 
 app.UseCustomExceptionHandlingMiddleware();
 
-app.MapGet("/heat/{temperature}", (Temperature temperature) => Results.Ok(temperature) );
+app.MapGet("/heat/{temperature}", (Temperature temperature) => Results.Ok(temperature));
 
 app.MapProductEndpoints();
-
+app.MapAsyncEndpoints();
 app.Run();
 
 
