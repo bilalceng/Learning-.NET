@@ -8,7 +8,6 @@ public static class AsParametersEndpoints
 
     public static void MapAsParametersEndpoints(this IEndpointRouteBuilder app)
     {
-        
           /*
           app.MapGet("/category/{id}",
          
