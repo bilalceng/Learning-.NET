@@ -30,3 +30,7 @@
 /home/bilal/RiderProjects/WebApplication1/WebApplication1/obj/Debug/net8.0/WebApplication1.pdb
 /home/bilal/RiderProjects/WebApplication1/WebApplication1/obj/Debug/net8.0/WebApplication1.genruntimeconfig.cache
 /home/bilal/RiderProjects/WebApplication1/WebApplication1/obj/Debug/net8.0/ref/WebApplication1.dll
+/home/bilal/RiderProjects/WebApplication1/WebApplication1/bin/Debug/net8.0/Microsoft.OpenApi.dll
+/home/bilal/RiderProjects/WebApplication1/WebApplication1/bin/Debug/net8.0/MinimalApis.Extensions.dll
+/home/bilal/RiderProjects/WebApplication1/WebApplication1/bin/Debug/net8.0/MiniValidation.dll
+/home/bilal/RiderProjects/WebApplication1/WebApplication1/obj/Debug/net8.0/WebApplication1.MvcApplicationPartsAssemblyInfo.cs

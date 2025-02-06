@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Microsoft.AspNetCore.Diagnostics;
 using WebApplication1.endpoints;
 using WebApplication1.middlewares.ExceptionHandling;
 using WebApplication1.models;
@@ -19,9 +18,10 @@ var app = builder.Build();
 
 app.UseCustomExceptionHandlingMiddleware();
 
-app.MapGet("/heat/{temperature}", (Temperature temperature) => Results.Ok(temperature) );
+app.MapGet("/heat/{temperature}", (Temperature temperature) => Results.Ok(temperature));
 
 app.MapProductEndpoints();
+app.MapDataAnnotationEndPoints();
 
 app.Run();
 
