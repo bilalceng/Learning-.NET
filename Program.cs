@@ -1,11 +1,21 @@
 using System.Text.Json;
-using Microsoft.AspNetCore.Diagnostics;
+using WebApplication1.di;
 using WebApplication1.endpoints;
 using WebApplication1.middlewares.ExceptionHandling;
 using WebApplication1.models;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddProblemDetails();
+builder.Host.UseDefaultServiceProvider(
+    options =>
+    {
+        options.ValidateScopes = true;
+        options.ValidateOnBuild = true;
+        
+    });
+builder.Services.AddEmailSender();
+builder.Services.AddMessageSender();
+builder.Services.AddDbRepo();
+
 
 builder.Services.ConfigureHttpJsonOptions(o => {
     o.SerializerOptions.AllowTrailingCommas = false;
@@ -16,12 +26,12 @@ builder.Services.ConfigureHttpJsonOptions(o => {
 
 var app = builder.Build();
 
-
 app.UseCustomExceptionHandlingMiddleware();
 
-app.MapGet("/heat/{temperature}", (Temperature temperature) => Results.Ok(temperature) );
-
+app.MapGet("/heat/{temperature}", (Temperature temperature) => Results.Ok(temperature));
 app.MapProductEndpoints();
+app.MapDISampleEndpoints();
+app.MapDILifeTimeSampleEndpoints();
 
 app.Run();
 

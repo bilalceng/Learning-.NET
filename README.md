@@ -1,94 +1,179 @@
-Here’s a **minimal and clean version** of parameter binding rules in **ASP.NET Core Minimal APIs**, with concise examples and emojis for better readability. Perfect for a README! 🚀
+# 🚀 Dependency Injection (DI) in ASP.NET Core Minimal APIs
+
+Dependency Injection (DI) is a fundamental concept in ASP.NET Core, enabling loose coupling, testability, and modularity. ASP.NET Core’s DI container provides built-in support for service registration and resolution.
 
 ---
 
-# 📖 Parameter Binding in Minimal APIs
-
-ASP.NET Core Minimal APIs automatically bind request data to route handler parameters. Here's how it works:
-
----
-
-## 🎯 **1. Explicit Binding**
-Use attributes like `[FromRoute]`, `[FromQuery]`, or `[FromBody]` to specify the binding source.
+## 🏗️ **1. Registering Services**
+In **Program.cs**, services are registered in the DI container using `builder.Services.AddXXX()`, following the built-in DI container approach.
 
 ```csharp
-app.MapGet("/users/{id}", ([FromRoute] int id) => $"User ID: {id}");
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddSingleton<IMyService, MyService>();
+var app = builder.Build();
+```
+
+### 💡 Key Takeaway:
+- ASP.NET Core **does not support property injection** by default.
+- Services should be **registered before `builder.Build()` is called**.
+
+---
+
+## 🎯 **2. Constructor Injection in Minimal APIs**
+Minimal APIs resolve services automatically through **constructor injection** when used in route handlers.
+
+```csharp
+app.MapGet("/data", (IMyService service) => service.GetData());
+```
+
+✅ No need for `[FromServices]`—ASP.NET Core’s built-in DI container automatically injects dependencies.
+
+---
+
+## 🔄 **3. Service Lifetimes Explained**
+ASP.NET Core DI supports three service lifetimes:
+
+- **Transient (`AddTransient<T>`)**: A new instance is created every time it’s requested.
+- **Scoped (`AddScoped<T>`)**: A single instance is created per HTTP request.
+- **Singleton (`AddSingleton<T>`)**: A single instance is created for the app’s lifetime.
+
+```csharp
+builder.Services.AddTransient<IMyService, MyService>();
+builder.Services.AddScoped<IRepository, Repository>();
+builder.Services.AddSingleton<ILogger, Logger>();
+```
+
+### ⚠️ **Beware of Capturing Scoped Services in Singletons!**
+If a singleton service depends on a scoped service, it can cause **unexpected behavior**.
+
+```csharp
+public class MySingleton
+{
+    private readonly IRepository _repository;
+    public MySingleton(IRepository repository) // ❌ Avoid injecting scoped services
+    {
+        _repository = repository;
+    }
+}
+```
+
+🔹 Instead, inject `IServiceProvider` and resolve the service inside a method:
+
+```csharp
+public class MySingleton
+{
+    private readonly IServiceProvider _provider;
+    public MySingleton(IServiceProvider provider) 
+    {
+        _provider = provider;
+    }
+    public void DoWork()
+    {
+        using var scope = _provider.CreateScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IRepository>();
+        repository.Process();
+    }
+}
 ```
 
 ---
 
-## 🌐 **2. Well-Known Types**
-Parameters like `HttpContext`, `HttpRequest`, `Stream`, or `IFormFile` are automatically bound.
+## 📦 **4. Injecting Configuration with `IOptions<T>`**
+Configuration settings can be injected using **Options Pattern (`IOptions<T>`)**.
 
 ```csharp
-app.MapPost("/upload", async (IFormFile file) => 
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+
+app.MapGet("/config", (IOptions<AppSettings> options) =>
 {
-    var fileName = file.FileName;
-    return Results.Ok($"Uploaded: {fileName}");
+    return Results.Ok(options.Value);
 });
 ```
 
 ---
 
-## 🔄 **3. BindAsync()**
-If the parameter type has a `BindAsync()` method, it’s used for binding.
+## 🌐 **5. Injecting `HttpClient` Efficiently**
+Instead of manually creating `HttpClient`, register it using `AddHttpClient()`.
 
 ```csharp
-public record CustomModel(string Name)
+builder.Services.AddHttpClient<IMyService, MyService>();
+```
+
+🔹 This ensures **connection pooling and performance optimization**.
+
+---
+
+## 🏗️ **6. Factory-based Dependency Injection**
+You can use factories for **custom service creation**.
+
+```csharp
+builder.Services.AddSingleton(provider => new MyService("Custom Param"));
+```
+
+---
+
+## 🔄 **7. Injecting Services into Middleware**
+Middleware components can use DI via constructor injection.
+
+```csharp
+public class CustomMiddleware
 {
-    public static ValueTask<CustomModel?> BindAsync(HttpContext context) 
+    private readonly RequestDelegate _next;
+    private readonly IMyService _service;
+    public CustomMiddleware(RequestDelegate next, IMyService service)
     {
-        var name = context.Request.Query["name"];
-        return ValueTask.FromResult(new CustomModel(name!));
+        _next = next;
+        _service = service;
+    }
+    public async Task InvokeAsync(HttpContext context)
+    {
+        _service.Process();
+        await _next(context);
     }
 }
 
-app.MapGet("/custom", (CustomModel model) => $"Hello, {model.Name}!");
+app.UseMiddleware<CustomMiddleware>();
 ```
 
 ---
 
-## 🔢 **4. Simple Types**
-For `string` or types with `TryParse()`:
-- **a)** Binds to route values if the name matches.
-- **b)** Otherwise, binds to the query string.
+## 🎯 **8. Using DI with Background Services**
+To inject services into background tasks, inherit from `BackgroundService`.
 
 ```csharp
-app.MapGet("/product", (string name) => $"Product: {name}");
+public class MyBackgroundService : BackgroundService
+{
+    private readonly IMyService _service;
+    public MyBackgroundService(IMyService service)
+    {
+        _service = service;
+    }
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            _service.DoWork();
+            await Task.Delay(5000, stoppingToken);
+        }
+    }
+}
 ```
 
----
-
-## 🧮 **5. Arrays of Simple Types**
-Arrays of simple types (e.g., `string[]`, `int[]`) bind to the query string for `GET` requests.
+Register it using:
 
 ```csharp
-app.MapGet("/items", (int[] ids) => $"Item IDs: {string.Join(", ", ids)}");
-```
-
----
-
-## 🛠️ **6. Dependency Injection (DI)**
-Services from the DI container are automatically injected.
-
-```csharp
-app.MapGet("/service", (IMyService service) => service.GetData());
-```
-
----
-
-## 📦 **7. JSON Body Binding**
-For complex types, the request body is deserialized from JSON.
-
-```csharp
-app.MapPost("/user", (User user) => $"User: {user.Name}");
+builder.Services.AddHostedService<MyBackgroundService>();
 ```
 
 ---
 
 ## 🎉 **Summary**
-Minimal APIs make parameter binding simple and flexible! Whether it’s from the route, query, body, or DI, it just works. 🛡️✨
+- **Minimal APIs automatically inject services into route handlers.**
+- **Avoid injecting scoped services into singletons directly.**
+- **Use `IOptions<T>` for configuration and `AddHttpClient()` for HTTP clients.**
+- **Factory-based DI allows dynamic service creation.**
+- **Middleware and Background Services fully support DI.**
 
----
+🚀 **Mastering DI in ASP.NET Core Minimal APIs makes your app more modular, scalable, and testable!**
 
-Feel free to use this in your README! 📄✨
+# 📖 Parameter Binding in Minimal APIs
